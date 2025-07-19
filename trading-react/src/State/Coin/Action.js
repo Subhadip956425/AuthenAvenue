@@ -20,11 +20,12 @@ import {
   SEARCH_COIN_SUCCESS,
 } from "./ActionType";
 import api, { API_BASE_URL } from "@/Config/api";
+import { frontend_baseurl } from "../Enviorenment/env";
 
 export const getCoinList = (page) => async (dispatch) => {
   dispatch({ type: FETCH_COIN_LIST_REQUEST });
 
-  const baseurl = "http://localhost:5454";
+  const baseurl = frontend_baseurl;
 
   try {
     const { data } = await axios.get(`${baseurl}/coins?page=${page}`);

@@ -7,6 +7,9 @@ import { DotFilledIcon } from "@radix-ui/react-icons";
 import React from "react";
 import { useDispatch } from "react-redux";
 
+import razorpayImg from "@/assets/razorpay.webp";
+import stripeImg from "@/assets/stripe.png";
+
 const TopupForm = () => {
   const [amount, setAmount] = React.useState("");
   const [paymentMethod, setPaymentMethod] = React.useState("RAZORPAY");
@@ -58,7 +61,7 @@ const TopupForm = () => {
             />
             <Label hymlFor="r1">
               <div className="bg-white rounded-md px-5 py-2 w-32">
-                <img src="../../assets/1.png" alt="" />
+                <img src={razorpayImg} alt="" />
               </div>
             </Label>
           </div>
@@ -72,7 +75,7 @@ const TopupForm = () => {
             />
             <Label hymlFor="r2">
               <div className="bg-white rounded-md px-5 py-2 w-32">
-                <img className="h-9" src="../../assets/1.png" alt="" />
+                <img className="h-9" src={stripeImg} alt="" />
               </div>
             </Label>
           </div>

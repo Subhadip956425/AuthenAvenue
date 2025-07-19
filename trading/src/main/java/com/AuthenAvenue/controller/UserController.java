@@ -49,6 +49,8 @@ public class UserController {
     public ResponseEntity<String> sendVerificationOtp(@RequestHeader("Authorization") String jwt, @PathVariable VerificationType verificationType) throws Exception {
 //        this.jwt = jwt;
 
+//        System.out.println("Received verification type: " + verificationType);
+
         User user = userService.findUserProfileByJwt(jwt);
 
         VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user.getId());
@@ -112,7 +114,8 @@ public class UserController {
     }
 
     @PatchMapping("/auth/users/reset-password/verify-otp")
-    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String id, @RequestBody ResetPasswordRequest req, @RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<ApiResponse> resetPassword(@RequestParam String id, @RequestBody ResetPasswordRequest req) throws Exception {
+
 
         ForgotPasswordToken forgotPasswordToken = forgotPasswordService.findById(id);
 
@@ -127,4 +130,30 @@ public class UserController {
         throw new Exception("Wrong otp");
 
     }
+
+    @PutMapping("/api/users/profile/update")
+    public ResponseEntity<User> updateUserProfile(@RequestHeader("Authorization") String authHeader, @RequestBody User updatedData) throws Exception {
+        String token = authHeader.replace("Bearer ", "").trim();
+        User existingUser = userService.findUserProfileByJwt(token);
+
+        // Update fields manually (or use a mapper)
+        existingUser.setFullName(updatedData.getFullName());
+        existingUser.setDob(updatedData.getDob());
+        existingUser.setNationality(updatedData.getNationality());
+        existingUser.setAddress(updatedData.getAddress());
+        existingUser.setCity(updatedData.getCity());
+        existingUser.setPostcode(updatedData.getPostcode());
+        existingUser.setCountry(updatedData.getCountry());
+
+        User updatedUser = userService.saveUser(existingUser);
+
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleEnumException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid verification type.");
+    }
+
+
 }

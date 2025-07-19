@@ -34,4 +34,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         return walletTransactionRepository.save(transaction);
     }
+
+    @Override
+    public boolean existsByTransferId(String transferId) {
+        return walletTransactionRepository.existsByTransferId(transferId);
+    }
 }

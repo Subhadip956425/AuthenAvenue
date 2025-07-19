@@ -25,6 +25,23 @@ public class PaymentDetailsServiceImpl implements PaymentDetailsService {
         return paymentDetailsRepository.save(paymentDetails);
     }
 
+    public PaymentDetails updatePaymentDetails(Long id, PaymentDetails updatedDetails, User user) throws Exception {
+        PaymentDetails existing = paymentDetailsRepository.findById(id)
+                .orElseThrow(() -> new Exception("Payment details not found for ID: " + id));
+
+        if (!existing.getUser().getId().equals(user.getId())) {
+            throw new Exception("Unauthorized to update this payment detail.");
+        }
+
+        existing.setAccountNumber(updatedDetails.getAccountNumber());
+        existing.setAccountHolderName(updatedDetails.getAccountHolderName());
+        existing.setIfsc(updatedDetails.getIfsc());
+        existing.setBankName(updatedDetails.getBankName());
+
+        return paymentDetailsRepository.save(existing);
+    }
+
+
     @Override
     public PaymentDetails getUsersPaymentDetails(User user) {
         return paymentDetailsRepository.findByUserId(user.getId());

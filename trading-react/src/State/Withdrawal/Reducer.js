@@ -20,7 +20,7 @@ const initialState = {
   history: [],
   loading: false,
   error: null,
-  PaymentDetails: null,
+  paymentDetails: null,
   requests: [],
 };
 
@@ -48,7 +48,7 @@ const withdrawalReducer = (state = initialState, action) => {
     case GET_PAYMENT_DETAILS_SUCCESS:
       return {
         ...state,
-        PaymentDetails: action.payload,
+        paymentDetails: action.payload,
         loading: false,
         error: null,
       };

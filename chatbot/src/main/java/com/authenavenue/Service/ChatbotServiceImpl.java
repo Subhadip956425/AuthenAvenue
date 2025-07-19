@@ -72,7 +72,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     }
 
     public FunctionResponse getFunctionResponse(String prompt) {
-        String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY;
+        String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
 
         // Create JSON request body using method chaining
         JSONObject requestBodyJson = new JSONObject()
@@ -92,17 +92,17 @@ public class ChatbotServiceImpl implements ChatbotService {
                                                 .put("name", "getCoinDetails")
                                                 .put("description","Get the coin details from given currency object")
                                                 .put("parameters", new JSONObject()
-                                                        .put("type", "OBJECT")
+                                                        .put("type", "object")
                                                         .put("properties", new JSONObject()
                                                                 .put("currencyName", new JSONObject()
-                                                                        .put("type", "STRING")
+                                                                        .put("type", "string")
                                                                         .put(
                                                                                 "description",
                                                                                 "The currency name, " +
                                                                                         "id, symbol.")
                                                                 )
                                                                 .put("currencyData", new JSONObject()
-                                                                        .put("type", "STRING")
+                                                                        .put("type", "string")
                                                                         .put("description",
                                                                                 "Currency Data id, " +
                                                                                         "symbol, " +
@@ -162,24 +162,43 @@ public class ChatbotServiceImpl implements ChatbotService {
         JSONObject content = firstCandidate.getJSONObject("content");
         JSONArray parts = content.getJSONArray("parts");
         JSONObject firstPart = parts.getJSONObject(0);
-        JSONObject functionCall = firstPart.getJSONObject("functionCall");
+//        JSONObject functionCall = firstPart.getJSONObject("functionCall");
 
-        String functionName = functionCall.getString("name");
-        JSONObject args = functionCall.getJSONObject("args");
-        String currencyName  = args.getString("currencyName");
-        String currencyData = args.getString("currencyData");
+//        String functionName = functionCall.getString("name");
+//        JSONObject args = functionCall.getJSONObject("args");
+//        String currencyName  = args.getString("currencyName");
+//        String currencyData = args.getString("currencyData");
 
         // Print or use the extracted values
-        System.out.println("Function Name: " + functionName);
-        System.out.println("Currency Name: " + currencyName);
-        System.out.println("Currency Data: " + currencyData);
+//        System.out.println("Function Name: " + functionName);
+//        System.out.println("Currency Name: " + currencyName);
+//        System.out.println("Currency Data: " + currencyData);
+//
+//        FunctionResponse res = new FunctionResponse();
+//        res.setFunctionName(functionName);
+//        res.setCurrencyName(currencyName);
+//        res.setCurrencyData(currencyData);
 
-        FunctionResponse res = new FunctionResponse();
-        res.setFunctionName(functionName);
-        res.setCurrencyName(currencyName);
-        res.setCurrencyData(currencyData);
+//        return res;
 
-        return res;
+        // ✅ Safely check if functionCall exists
+        if (firstPart.has("functionCall")) {
+            JSONObject functionCall = firstPart.getJSONObject("functionCall");
+            String functionName = functionCall.getString("name");
+            JSONObject args = functionCall.getJSONObject("args");
+            String currencyName = args.getString("currencyName");
+            String currencyData = args.getString("currencyData");
+
+            FunctionResponse res = new FunctionResponse();
+            res.setFunctionName(functionName);
+            res.setCurrencyName(currencyName);
+            res.setCurrencyData(currencyData);
+
+            return res;
+        } else {
+            // If no functionCall, handle gracefully
+            throw new RuntimeException("Function call not returned by Gemini. Response was:\n" + responseBody);
+        }
     }
 
     @Override
@@ -187,7 +206,7 @@ public class ChatbotServiceImpl implements ChatbotService {
         FunctionResponse res = getFunctionResponse(prompt);
         CoinDto apiResponse = makeApiRequest(res.getCurrencyName().toLowerCase());
 
-        String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY;
+        String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -239,17 +258,17 @@ public class ChatbotServiceImpl implements ChatbotService {
                                                 .put("name", "getCoinDetails")
                                                 .put("description", "Get crypto currency data from given currency object.")
                                                 .put("parameters", new JSONObject()
-                                                        .put("type", "OBJECT")
+                                                        .put("type", "object")
                                                         .put("properties", new JSONObject()
                                                                 .put("currencyName", new JSONObject()
-                                                                        .put("type", "STRING")
+                                                                        .put("type", "string")
                                                                         .put("description",
                                                                                 "The currency Name, " +
                                                                                 "id, " +
                                                                                 "Symbol.")
                                                                 )
                                                                 .put("currencyData", new JSONObject()
-                                                                        .put("type", "STRING")
+                                                                        .put("type", "string")
                                                                         .put("description",
                                                                                 "The currency data id, " +
                                                                                         "symbol, current price, " +
@@ -303,7 +322,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Override
     public String simpleChat(String prompt) {
 
-        String GEMINI_API_URL="https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key="+GEMINI_API_KEY;
+        String GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="+GEMINI_API_KEY;
 
 //        String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key"+GEMINI_API_KEY;
 

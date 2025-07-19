@@ -1,6 +1,7 @@
 package com.AuthenAvenue.service;
 
 import com.AuthenAvenue.domain.OrderType;
+import com.AuthenAvenue.domain.WalletTransactionType;
 import com.AuthenAvenue.modal.Order;
 import com.AuthenAvenue.modal.User;
 import com.AuthenAvenue.modal.Wallet;
@@ -10,12 +11,16 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class WalletServiceImpl implements WalletService {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private TransactionService transactionService;
 
     @Override
     public Wallet getUserWallet(User user) {
@@ -54,15 +59,33 @@ public class WalletServiceImpl implements WalletService {
         if(senderWallet.getBalance().compareTo(BigDecimal.valueOf(amount)) < 0) {
             throw new Exception("Insufficient balance...");
         }
-        BigDecimal senderBalance = senderWallet.getBalance().subtract(BigDecimal.valueOf(amount));
-        senderWallet.setBalance(senderBalance);
-        walletRepository.save(senderWallet);
+//        BigDecimal senderBalance = senderWallet.getBalance().subtract(BigDecimal.valueOf(amount));
+//        senderWallet.setBalance(senderBalance);
+//        walletRepository.save(senderWallet);
+//
+//        BigDecimal receiverBalance = receiverWallet.getBalance().add(BigDecimal.valueOf(amount));
+//        receiverWallet.setBalance(receiverBalance);
+//        walletRepository.save(receiverWallet);
+//
+//        return senderWallet;
 
-        BigDecimal receiverBalance = receiverWallet.getBalance().add(BigDecimal.valueOf(amount));
-        receiverWallet.setBalance(receiverBalance);
+        // Transfer logic
+        senderWallet.setBalance(senderWallet.getBalance().subtract(BigDecimal.valueOf(amount)));
+        receiverWallet.setBalance(receiverWallet.getBalance().add(BigDecimal.valueOf(amount)));
+
+        walletRepository.save(senderWallet);
         walletRepository.save(receiverWallet);
 
+        // Create a unique transactionId
+        String transactionId = UUID.randomUUID().toString();
+
+        // Create transaction logs
+        transactionService.createTransaction(senderWallet, WalletTransactionType.WALLET_TRANSFER, transactionId, "Sent to wallet ID: " + receiverWallet.getId(), amount);
+        transactionService.createTransaction(receiverWallet, WalletTransactionType.WALLET_TRANSFER, transactionId, "Received from wallet ID: " + senderWallet.getId(), amount);
+
         return senderWallet;
+
+
     }
 
     @Override

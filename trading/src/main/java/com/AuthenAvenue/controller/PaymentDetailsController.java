@@ -21,6 +21,10 @@ public class PaymentDetailsController {
 
     @PostMapping("/payment-details")
     public ResponseEntity<PaymentDetails> addPaymentDetails(@RequestBody PaymentDetails paymentDetailsRequest, @RequestHeader("Authorization") String jwt) throws Exception {
+        if (jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7);
+        }
+
         User user = userService.findUserProfileByJwt(jwt);
 
         PaymentDetails paymentDetails = paymentDetailsService.addPaymentDetails(paymentDetailsRequest.getAccountNumber(), paymentDetailsRequest.getAccountHolderName(), paymentDetailsRequest.getIfsc(), paymentDetailsRequest.getBankName(), user);
@@ -28,12 +32,34 @@ public class PaymentDetailsController {
         return new ResponseEntity<>(paymentDetails, HttpStatus.CREATED);
     }
 
+    @PutMapping("/payment-details/{id}")
+    public ResponseEntity<PaymentDetails> updatePaymentDetails(
+            @PathVariable Long id,
+            @RequestBody PaymentDetails updatedDetails,
+            @RequestHeader("Authorization") String jwt) throws Exception {
+
+        if (jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7);
+        }
+
+        User user = userService.findUserProfileByJwt(jwt);
+
+        PaymentDetails paymentDetails = paymentDetailsService.updatePaymentDetails(id, updatedDetails, user);
+
+        return new ResponseEntity<>(paymentDetails, HttpStatus.OK);
+    }
+
+
     @GetMapping("/payment-details")
     public ResponseEntity<PaymentDetails> getUserPaymentDetails(@RequestHeader("Authorization") String jwt) throws Exception {
+        if (jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7);
+        }
+
         User user = userService.findUserProfileByJwt(jwt);
 
         PaymentDetails paymentDetails = paymentDetailsService.getUsersPaymentDetails(user);
 
-        return new ResponseEntity<>(paymentDetails, HttpStatus.CREATED);
+        return new ResponseEntity<>(paymentDetails, HttpStatus.OK);
     }
 }

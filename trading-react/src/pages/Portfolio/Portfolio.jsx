@@ -16,8 +16,12 @@ const Portfolio = () => {
   const { asset } = useSelector((store) => store);
 
   useEffect(() => {
-    dispatch(getUserAssets(localStorage.getItem("jwt")));
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      dispatch(getUserAssets({ jwt }));
+    }
   }, []);
+
   return (
     <div className="p-5 lg:p-20">
       <h1 className="font-bold text-3xl pb-5">Portfolio</h1>
@@ -41,7 +45,9 @@ const Portfolio = () => {
                 </Avatar>
                 <span>{item.coin.name}</span>
               </TableCell>
-              <TableCell>{item.coin.symbol.toUpperCase()}</TableCell>
+              <TableCell>
+                {(item.buyPrice * item.quantity).toFixed(2)}
+              </TableCell>
               <TableCell>{item.quantity}</TableCell>
               <TableCell>{item.coin.price_change_24h}</TableCell>
               <TableCell>{item.coin.price_change_percentage_24h}</TableCell>

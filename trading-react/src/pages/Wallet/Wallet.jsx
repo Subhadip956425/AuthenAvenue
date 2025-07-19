@@ -29,6 +29,7 @@ import {
   getWalletTransaction,
 } from "@/State/Wallet/Action";
 import { useLocation, useNavigate } from "react-router-dom";
+import TreadingForm from "../StockDetails/TreadingForm";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -152,13 +153,34 @@ export const Wallet = () => {
                   <TransferForm />
                 </DialogContent>
               </Dialog>
+
+              {/* ✅ New Buy/Sell Dialog */}
+              <Dialog>
+                <DialogTrigger>
+                  <div className="h-24 w-24 hover:text-gray-400 cursor-pointer flex flex-col items-center justify-center rounded-md shadow-slate-800 shadow-md">
+                    <ShuffleIcon />
+                    <span className="text-sm mt-2">Buy / Sell</span>
+                  </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-center text-xl">
+                      Trade Coin
+                    </DialogTitle>
+                  </DialogHeader>
+                  <TreadingForm onOrderSuccess={handleFetchWalletTransaction} />
+                </DialogContent>
+              </Dialog>
             </div>
           </CardContent>
         </Card>
         <div className="py-5 pt-10">
           <div className="flex gap-2 items-center pb-5">
             <h1 className="text-2xl font-semibold">History</h1>
-            <UpdateIcon className="h-7 w-7 p-0 cursor-pointer hover:text-gray-400" />
+            <UpdateIcon
+              className="h-7 w-7 p-0 cursor-pointer hover:text-gray-400"
+              onClick={handleFetchWalletTransaction}
+            />
           </div>
 
           <div className="space-y-5">
@@ -166,7 +188,7 @@ export const Wallet = () => {
               <div key={i}>
                 <Card className="px-5 flex justify-between items-center p-2">
                   <div className="flex items-center gap-5">
-                    <Avatar onClick={handleFetchWalletTransaction}>
+                    <Avatar>
                       <AvatarFallback>
                         <ShuffleIcon className="" />
                       </AvatarFallback>
@@ -177,7 +199,28 @@ export const Wallet = () => {
                     </div>
                   </div>
                   <div>
-                    <p className="text-green-500">{item.amount}</p>
+                    <p
+                      className={
+                        item.type === "ADD_MONEY" ||
+                        item.type === "RECEIVED" ||
+                        item.type === "SELL_ASSET" ||
+                        (item.type === "WALLET_TRANSFER" &&
+                          item.purpose?.toLowerCase().includes("received") &&
+                          item.wallet?.id === wallet.userWallet?.id)
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }
+                    >
+                      {item.type === "ADD_MONEY" ||
+                      item.type === "RECEIVED" ||
+                      item.type === "SELL_ASSET" ||
+                      (item.type === "WALLET_TRANSFER" &&
+                        item.purpose?.toLowerCase().includes("received") &&
+                        item.wallet?.id === wallet.userWallet?.id)
+                        ? "+"
+                        : "-"}
+                      ₹{item.amount}
+                    </p>
                   </div>
                 </Card>
               </div>

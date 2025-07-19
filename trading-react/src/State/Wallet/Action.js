@@ -117,32 +117,36 @@ export const paymentHandler =
     }
   };
 
-export const transferMoney =
-  ({ jwt, walletId, reqData }) =>
-  async (dispatch) => {
+export const transferMoney = ({ jwt, walletId, reqData }) => {
+  return async (dispatch) => {
     dispatch({ type: types.TRANSFER_MONEY_REQUEST });
 
     try {
-      const response = await api.put(
-        `/api/wallet/${walletId}/transfer`,
-        reqData,
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-        }
-      );
+      const res = await api.put(`/api/wallet/${walletId}/transfer`, reqData, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       dispatch({
         type: types.TRANSFER_MONEY_SUCCESS,
-        payload: response.data,
+        payload: res.data,
       });
 
-      console.log("Transfer money sent", response.data);
+      return { success: true, data: res.data }; // Used in .then()
     } catch (error) {
       dispatch({
         type: types.TRANSFER_MONEY_FAILURE,
         error: error.message,
       });
+
+      return {
+        success: false,
+        error:
+          error?.response?.data?.message ||
+          "Transfer failed or Wallet not found",
+      };
     }
   };
+};

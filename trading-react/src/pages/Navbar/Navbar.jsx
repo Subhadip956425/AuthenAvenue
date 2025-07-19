@@ -29,15 +29,13 @@ const Navbar = () => {
       <div className="flex items-center gap-3">
         <Sheet>
           <SheetTrigger asChild>
-            <div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full h-11 w-11"
-              >
-                <DragHandleHorizontalIcon className="h-7 w-7" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full h-11 w-11"
+            >
+              <DragHandleHorizontalIcon className="h-7 w-7" />
+            </Button>
           </SheetTrigger>
           <SheetContent
             className="w-72 border-r-0 flex-col justify-center"

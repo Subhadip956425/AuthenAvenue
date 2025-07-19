@@ -62,10 +62,10 @@ const StockDetails = () => {
               </p>
               <p className="text-red-600">
                 <span>
-                  {coin.coinDetails?.market_data.market_cap_change_24h}
+                  -{coin.coinDetails?.market_data.market_cap_change_24h}
                 </span>
                 <span>
-                  (
+                  ( -
                   {
                     coin.coinDetails?.market_data
                       .market_cap_change_percentage_24h

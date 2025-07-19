@@ -2,12 +2,15 @@
 package com.AuthenAvenue.controller;
 
 import com.AuthenAvenue.domain.OrderType;
+import com.AuthenAvenue.domain.WalletTransactionType;
 import com.AuthenAvenue.modal.Coin;
 import com.AuthenAvenue.modal.Order;
 import com.AuthenAvenue.modal.User;
+import com.AuthenAvenue.modal.Wallet;
 import com.AuthenAvenue.request.CreateOrderRequest;
 import com.AuthenAvenue.service.CoinService;
 import com.AuthenAvenue.service.OrderService;
+import com.AuthenAvenue.service.TransactionService;
 import com.AuthenAvenue.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,9 @@ public class OrderController {
     @Autowired
     private CoinService coinService;
 
+    @Autowired
+    private TransactionService transactionService;
+
 //    @Autowired
 //    private WalletTransactionService walletTransactionService;
 
@@ -45,6 +51,24 @@ public class OrderController {
         Coin coin = coinService.findById(req.getCoinId());
 
         Order order = orderService.processOrder(coin, req.getQuantity(), req.getOrderType(), user);  ////////////////////////////
+
+        // Get user wallet (after balance deduction)
+        Wallet wallet = user.getWallet(); // or use walletService.getUserWallet(user) if null
+
+        // 🟡 Prevent duplicates based on orderId
+        String transactionId = "ORDER#" + order.getId();
+        boolean alreadyExists = transactionService.existsByTransferId(transactionId);
+        if (!alreadyExists) {
+            // Create transaction log
+            transactionService.createTransaction(
+                    wallet,
+                    order.getOrderType() == OrderType.BUY ? WalletTransactionType.BUY_ASSET : WalletTransactionType.SELL_ASSET,
+                    transactionId,
+                    order.getOrderType() + " " + coin.getSymbol(),
+                    order.getPrice().longValue()
+            );
+        }
+
 
         return ResponseEntity.ok(order);
     }

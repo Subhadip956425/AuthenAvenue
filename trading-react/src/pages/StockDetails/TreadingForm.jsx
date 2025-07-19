@@ -3,16 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAssetDetails } from "@/State/Assets/Action";
 import { getUserWallet } from "@/State/Wallet/Action";
+import { payOrder } from "@/State/Order/Action";
 import { DotIcon } from "@radix-ui/react-icons";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { DialogClose } from "@/components/ui/dialog";
 
-const TreadingForm = () => {
+const TreadingForm = ({ onOrderSuccess }) => {
   const [orderType, setOrderType] = useState("BUY");
   const [amount, setAmount] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const { coin, wallet, asset } = useSelector((store) => store);
   const dispatch = useDispatch();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleChange = (e) => {
     const amount = e.target.value;
@@ -32,16 +36,53 @@ const TreadingForm = () => {
   };
 
   useEffect(() => {
-    dispatch(getUserWallet(localStorage.getItem("jwt")));
-    dispatch(
-      getAssetDetails({
-        coinId: coin.coinDetails.id,
-        jwt: localStorage.getItem("jwt"),
-      })
-    );
-  }, []);
+    if (coin.coinDetails?.id) {
+      dispatch(getUserWallet(localStorage.getItem("jwt")));
+      dispatch(
+        getAssetDetails({
+          coinId: coin.coinDetails.id,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
+    }
+  }, [coin.coinDetails]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(""), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(""), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const handleBuyCrypto = () => {
+    const balance = wallet.userWallet?.balance || 0;
+    const ownedQuantity = asset.assetDetails?.quantity || 0;
+
+    if (!coin.coinDetails?.id) {
+      setErrorMessage("Coin not loaded. Please try again later.");
+      return;
+    }
+
+    if (orderType === "BUY" && Number(amount) > Number(balance)) {
+      setErrorMessage("Insufficient wallet balance.");
+      return;
+    }
+
+    if (orderType === "SELL" && Number(quantity) > Number(ownedQuantity)) {
+      setErrorMessage("Insufficient asset quantity to sell.");
+      return;
+    }
+
+    // Clear error if valid
+    setErrorMessage("");
+
     dispatch(
       payOrder({
         jwt: localStorage.getItem("jwt"),
@@ -52,7 +93,30 @@ const TreadingForm = () => {
           orderType,
         },
       })
-    );
+    )
+      .then(() => {
+        dispatch(getUserWallet(localStorage.getItem("jwt")));
+        dispatch(
+          getAssetDetails({
+            coinId: coin.coinDetails.id,
+            jwt: localStorage.getItem("jwt"),
+          })
+        );
+        setSuccessMessage(
+          orderType === "BUY"
+            ? "Crypto purchased successfully!"
+            : "Crypto sold successfully!"
+        );
+
+        setAmount(0);
+        setQuantity(0);
+        setOrderType("BUY");
+
+        onOrderSuccess?.();
+      })
+      .catch((error) => {
+        console.error("Order failed:", error);
+      });
   };
 
   return (
@@ -65,6 +129,7 @@ const TreadingForm = () => {
             onChange={handleChange}
             type="number"
             name="amount"
+            value={amount}
           />
 
           <div>
@@ -73,31 +138,50 @@ const TreadingForm = () => {
             </p>
           </div>
         </div>
-        {false && (
-          <h1 className="text-red-600 text-center pt-4">
-            Insufficent wallet balance to buy
-          </h1>
+        {errorMessage && (
+          <h1 className="text-red-600 text-center pt-4">{errorMessage}</h1>
+        )}
+
+        {successMessage && (
+          <h1 className="text-green-600 text-center pt-4">{successMessage}</h1>
         )}
       </div>
       <div className="flex gap-5 items-center">
         <div>
           <Avatar>
-            <AvatarImage src={"1.png"} />
+            <AvatarImage
+              src={coin.coinDetails?.image?.thumb || "/fallback.png"}
+              alt={coin.coinDetails?.name || "Coin"}
+            />
           </Avatar>
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <p>BTC</p>
+            <p className="uppercase">{coin.coinDetails?.symbol}</p>
             <DotIcon className="text-gray-400" />
-            <p className="text-gray-400">Bitcoin</p>
+            <p className="text-gray-400">{coin.coinDetails?.name}</p>
           </div>
           <div className="flex items-end gap-2">
             <p className="text-x1 font-bold">
               ${coin.coinDetails?.market_data.current_price.usd}
             </p>
-            <p className="text-red-600">
-              <span>-131905739376.765</span>
-              <span>(-0.29803%)</span>
+            <p
+              className={
+                coin.coinDetails?.market_data?.price_change_percentage_24h > 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }
+            >
+              <span>
+                {coin.coinDetails?.market_data?.price_change_24h?.toFixed(2)}
+              </span>
+              <span>
+                (
+                {coin.coinDetails?.market_data?.price_change_percentage_24h?.toFixed(
+                  2
+                )}
+                %)
+              </span>
             </p>
           </div>
         </div>

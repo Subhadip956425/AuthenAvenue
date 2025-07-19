@@ -13,53 +13,123 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { frontend_baseurl } from "@/State/Enviorenment/env";
 
-const AccountVerificatioForm = () => {
-    
-    const [value, setValue] = useState("");
+const AccountVerificationForm = () => {
+  const [value, setValue] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const baseurl = frontend_baseurl || "http://localhost:5454";
 
-    const handleSubmit=()=>{
-        console.log(value);
+  const fetchUserProfile = async () => {
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt) return;
+
+    try {
+      const response = await axios.get(`${baseurl}/api/users/profile`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      setUserEmail(response.data.email || "");
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
     }
+  };
+
+  const sendOtp = async () => {
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt) return alert("User not logged in!");
+
+    try {
+      await axios.post(
+        `${baseurl}/api/users/verification/EMAIL/send-otp`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+      setDialogOpen(true);
+    } catch (error) {
+      console.error("OTP send failed:", error);
+      alert("Failed to send OTP");
+    }
+  };
+
+  const handleSubmit = async () => {
+    const jwt = localStorage.getItem("jwt");
+    if (!jwt || value.length !== 6) return alert("Invalid OTP or user session");
+
+    try {
+      const response = await axios.patch(
+        `${baseurl}/api/users/enable-two-factor/verify-otp/${value}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+      alert("Two-factor authentication enabled!");
+      console.log("OTP verified. User:", response.data);
+      window.location.reload();
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      alert("Invalid OTP. Try again.");
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const maskEmail = (email) => {
+    const [name, domain] = email.split("@");
+    if (!name || !domain) return email;
+    return `${name[0]}${"*".repeat(name.length - 2)}${name.slice(
+      -1
+    )}@${domain}`;
+  };
 
   return (
     <div className="flex justify-center">
-      <div className="space-y-5 mt-10 w-full">
+      <div className="space-y-5 mt-10 w-full max-w-md">
         <div className="flex justify-between items-center">
-          <p>Email : </p>
-          <p>s***************@gmail.com</p>
-          <Dialog>
-            <DialogTrigger>
-              <Button>Sent OTP</Button>
+          <span>Email:</span>
+          <span className="text-muted-foreground">
+            {userEmail ? maskEmail(userEmail) : "Loading..."}
+          </span>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={sendOtp}>Send OTP</Button>
             </DialogTrigger>
+
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Enter OTP</DialogTitle>
               </DialogHeader>
-              <div className="py-5 flex gap-10 justify-center items-center">
-                <InputOTP
-                value={value}
-                onChange={(value)=>setValue(value)}
-                 maxLength={6}>
+              <div className="py-5 flex flex-col items-center gap-6">
+                <InputOTP value={value} onChange={setValue} maxLength={6}>
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
+                    {[0, 1, 2].map((i) => (
+                      <InputOTPSlot key={i} index={i} />
+                    ))}
                   </InputOTPGroup>
                   <InputOTPSeparator />
                   <InputOTPGroup>
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                    {[3, 4, 5].map((i) => (
+                      <InputOTPSlot key={i} index={i} />
+                    ))}
                   </InputOTPGroup>
                 </InputOTP>
-                <DialogClose>
-                    <Button
-                    onClick={handleSubmit}
-                    className={"w-[10rem]"}>
-                        Submit
-                    </Button>
+
+                <DialogClose asChild>
+                  <Button className="w-40" onClick={handleSubmit}>
+                    Submit
+                  </Button>
                 </DialogClose>
               </div>
             </DialogContent>
@@ -70,4 +140,4 @@ const AccountVerificatioForm = () => {
   );
 };
 
-export default AccountVerificatioForm;
+export default AccountVerificationForm;

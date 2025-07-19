@@ -23,7 +23,10 @@ const PaymentDetails = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getPaymentDetils({ jwy: localStorage.getItem("jwt") }));
+    // dispatch(getPaymentDetils({ jwt: localStorage.getItem("jwt") }));
+    const token = localStorage.getItem("jwt");
+    // console.log("JWT from localStorage:", token); // ✅ Add logging to verify it's valid
+    dispatch(getPaymentDetils(token));
   }, []);
 
   return (
@@ -32,25 +35,53 @@ const PaymentDetails = () => {
 
       {withdrawal.paymentDetails ? (
         <Card>
-          <CardHeader>
-            <CardTitle>Yes Bank</CardTitle>
-            <CardDescription>
-              A/C No : {withdrawal.paymentDetails?.accountNumber}
-            </CardDescription>
+          <CardHeader className="flex justify-between items-center">
+            <div>
+              <CardTitle>Bank Details</CardTitle>
+              <CardDescription>
+                A/C No : {withdrawal.paymentDetails?.accountNumber}
+              </CardDescription>
+            </div>
+
+            <Dialog>
+              <DialogTrigger>
+                <Button variant="outline">Edit</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Payment Details</DialogTitle>
+                </DialogHeader>
+                <PaymentDetailsForm
+                  defaultValues={{
+                    id: withdrawal.paymentDetails.id,
+                    accountHolderName:
+                      withdrawal.paymentDetails.accountHolderName,
+                    ifsc: withdrawal.paymentDetails.ifsc,
+                    accountNumber: withdrawal.paymentDetails.accountNumber,
+                    bankName: withdrawal.paymentDetails.bankName,
+                  }}
+                  isEdit={true}
+                />
+              </DialogContent>
+            </Dialog>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
               <p className="w-32">A/C Holder</p>
               <p className="text-gray-400">
-                {" "}
                 : {withdrawal.paymentDetails?.accountHolderName}
+              </p>
+            </div>
+            <div className="flex items-center">
+              <p className="w-32">Bank Name</p>
+              <p className="text-gray-400">
+                : {withdrawal.paymentDetails?.bankName}
               </p>
             </div>
             <div className="flex items-center">
               <p className="w-32">IFSC</p>
               <p className="text-gray-400">
-                {" "}
-                : {withdrawal.paymentDetails?.bankName}
+                : {withdrawal.paymentDetails?.ifsc}
               </p>
             </div>
           </CardContent>

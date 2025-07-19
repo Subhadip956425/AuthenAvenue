@@ -27,4 +27,6 @@ public interface TransactionService {
      * @return The created WalletTransaction object.
      */
     WalletTransaction createTransaction(Wallet wallet, WalletTransactionType type, String transactionId, String purpose, Long amount);
+
+    boolean existsByTransferId(String paymentId);
 }

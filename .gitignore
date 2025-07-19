@@ -1,0 +1,41 @@
+# Ignore node_modules in all subprojects
+**/node_modules/
+
+# Ignore build outputs for Vite and Next.js
+**/dist/
+**/.next/
+**/out/
+
+# Ignore environment and logs
+**/.env
+**/.env.*
+**/.DS_Store
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Ignore Vite cache
+**/.vite/
+
+# Ignore IDE/workspace settings
+.vscode/
+.idea/
+*.iml
+
+# Spring Boot specific ignores
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Optional: Mac/Linux swap/lock files
+*.swp
+*.swo
+*.lock

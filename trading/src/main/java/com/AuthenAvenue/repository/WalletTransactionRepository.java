@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface WalletTransactionRepository extends JpaRepository<WalletTransaction, Long> {
     List<WalletTransaction> findByWallet(Wallet wallet);
+
+    boolean existsByTransferId(String transferId);
+
 }

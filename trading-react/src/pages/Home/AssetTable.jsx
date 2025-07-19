@@ -38,7 +38,7 @@ const AssetTable = ({ coin, category }) => {
                 <Avatar className="-z-50">
                   <AvatarImage src={item.image} />
                 </Avatar>
-                <span>{item.name}</span>
+                <span className="cursor-pointer">{item.name}</span>
               </TableCell>
               <TableCell>{item.symbol}</TableCell>
               <TableCell>{item.total_volume}</TableCell>

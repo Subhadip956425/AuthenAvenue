@@ -114,30 +114,39 @@ export const getAllWithdrawalRequest = (jwt) => async (dispatch) => {
   }
 };
 
-export const addPaymentDetails = (paymentDetails, jwt) => async (dispatch) => {
-  dispatch({ type: ADD_PAYMENT_DETAILS_REQUEST });
+export const addPaymentDetails =
+  (paymentDetails, jwt, isEdit = false) =>
+  async (dispatch) => {
+    dispatch({ type: ADD_PAYMENT_DETAILS_REQUEST });
 
-  try {
-    const response = await api.post(`/api/payment-details`, paymentDetails, {
-      headers: { Authorization: `Bearer ${jwt}` },
-    });
+    try {
+      const method = isEdit ? "put" : "post";
+      const url = isEdit
+        ? `/api/payment-details/${paymentDetails.id}` // assuming you pass an `id` on edit
+        : `/api/payment-details`;
 
-    console.log("Add payment details ----", response.data);
-    dispatch({
-      type: ADD_PAYMENT_DETAILS_SUCCESS,
-      payload: response.data,
-    });
-  } catch (error) {
-    console.log("error", error);
-    dispatch({
-      type: ADD_PAYMENT_DETAILS_FAILURE,
-      payload: error.message,
-    });
-  }
-};
+      const response = await api[method](url, paymentDetails, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+
+      dispatch({
+        type: ADD_PAYMENT_DETAILS_SUCCESS,
+        payload: response.data,
+      });
+    } catch (error) {
+      dispatch({
+        type: ADD_PAYMENT_DETAILS_FAILURE,
+        payload: error.message,
+      });
+    }
+  };
 
 export const getPaymentDetils = (jwt) => async (dispatch) => {
   dispatch({ type: GET_PAYMENT_DETAILS_REQUEST });
+
+  // ✅ Log JWT being sent
+  console.log("JWT being sent: ", jwt);
+  console.log("JWT being sent:", jwt, typeof jwt);
 
   try {
     const response = await api.get(`/api/payment-details`, {

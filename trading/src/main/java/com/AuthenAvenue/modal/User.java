@@ -2,9 +2,12 @@ package com.AuthenAvenue.modal;
 
 import com.AuthenAvenue.domain.USER_ROLE;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -24,9 +27,20 @@ public class User {
 
     private USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dob;
+
+    private String nationality;
+    private String address;
+    private String city;
+    private String postcode;
+    private String country;
+
     // Establish relationship with Wallet
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)           /////////////////////////////
     @JsonBackReference // Prevents circular references during serialization
     private Wallet wallet;
+
+
 
 }

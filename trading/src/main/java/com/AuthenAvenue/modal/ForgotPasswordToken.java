@@ -4,13 +4,21 @@ import com.AuthenAvenue.domain.VerificationType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Data
 public class ForgotPasswordToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
+
+    @PrePersist
+    public void generateId() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
+    }
 
     @OneToOne
     private User user;

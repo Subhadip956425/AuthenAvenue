@@ -18,10 +18,23 @@ public class AppConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.sessionManagement(managment->managment.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests(Authorize->Authorize.requestMatchers("/api/**").authenticated().anyRequest().permitAll()).addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class).csrf(csrf->csrf.disable()).cors(cors -> cors.configurationSource(corsConfigarationSource()));
+        http
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/users/forgot-password/**",
+                                "/api/auth/users/reset-password/**"
+                        ).permitAll() // ✅ Publicly accessible endpoints
+                        .requestMatchers("/api/**").authenticated() // Secure other API endpoints
+                        .anyRequest().permitAll()
+                )
+                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigarationSource()));
 
         return http.build();
     }
+
 
     // Connect Backend with Frontend
     private CorsConfigurationSource corsConfigarationSource() {

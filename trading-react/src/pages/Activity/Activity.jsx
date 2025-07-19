@@ -50,7 +50,20 @@ const Activity = () => {
               <TableCell>{item.orderItem.buyPrice}</TableCell>
               <TableCell>{item.orderItem.sellPrice}</TableCell>
               <TableCell>{item.orderType}</TableCell>
-              <TableCell className="">{calculateProfit(item)}</TableCell>
+              <TableCell
+                className={
+                  calculateProfit(item) > 0
+                    ? "text-green-600 font-semibold"
+                    : calculateProfit(item) < 0
+                    ? "text-red-600 font-semibold"
+                    : "text-gray-400"
+                }
+              >
+                {calculateProfit(item) !== null
+                  ? `$${calculateProfit(item).toFixed(2)}`
+                  : "-"}
+              </TableCell>
+
               <TableCell className="text-right">{item.price}</TableCell>
             </TableRow>
           ))}

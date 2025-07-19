@@ -12,7 +12,7 @@ const Chatbox = ({ isBotRealease, handleBotRealease }) => {
   const handleFetchCoinDetails = async (prompt) => {
     setLoading(true);
     try {
-      const { data } = await axios.post("http://localhost:5454/ai/chat", {
+      const { data } = await axios.post("http://localhost:5455/ai/chat", {
         prompt,
       });
       const response = { message: data.message, role: "model" };

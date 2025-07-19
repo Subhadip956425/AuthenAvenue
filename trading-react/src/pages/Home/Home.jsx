@@ -119,7 +119,7 @@ const Home = () => {
           <div className="flex gap-5 items-center">
             <div>
               <Avatar>
-                <AvatarImage src={"1.png"} />
+                <AvatarImage src={"1.png"} alt="Bitcoin" />
               </Avatar>
             </div>
 
@@ -143,16 +143,9 @@ const Home = () => {
 
       {/* Chat bot Section */}
       <section className="absolute bottom-5 right-5 z-40 flex flex-col justify-end items-end gap-2">
-        {isBotRelease && (
-          <Chatbox
-            isBotRealease={isBotRelease}
-            handleBotRealease={setIsBotRelease}
-          />
-        )}
-
         <div className="relative w-[10rem] cursor-pointer group">
           <Button
-            onClick={() => setIsBotRelease(!isBotRelease)}
+            onClick={() => window.open("http://localhost:3000/", "_blank")}
             className="w-full h-[3rem] gap-2 items-center"
           >
             <MessageCircle

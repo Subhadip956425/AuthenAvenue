@@ -35,8 +35,8 @@ public class PaymentController {
         Long amountInSmallestUnit = amount * 100; // Convert ₹ to paise
 
         // Create payment order
-        PaymentOrder order = paymentService.createOrder(user, amount, paymentMethod);
-//        PaymentOrder order = paymentService.createOrder(user, amountInSmallestUnit, paymentMethod);
+//        PaymentOrder order = paymentService.createOrder(user, amount, paymentMethod);
+        PaymentOrder order = paymentService.createOrder(user, amountInSmallestUnit, paymentMethod);
 
         if(paymentMethod.equals(PaymentMethod.RAZORPAY)) {
             paymentResponse = paymentService.createRezorpayPaymentLing(user, amountInSmallestUnit, order.getId());

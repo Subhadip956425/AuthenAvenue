@@ -7,7 +7,7 @@ export const getAssetById =
     dispatch({ type: types.GET_ASSET_REQUEST });
 
     try {
-      const response = await api.get(`/api/assets/${assetId}`, {
+      const response = await api.get(`/api/asset/${assetId}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -42,6 +42,7 @@ export const getAssetDetails =
       });
       console.log("Asset details -----:", response.data);
     } catch (error) {
+      console.log("asset details ---", error);
       dispatch({
         type: types.GET_ASSET_FAILURE,
         error: error.message,
@@ -64,7 +65,7 @@ export const getUserAssets =
         type: types.GET_USER_ASSET_SUCCESS,
         payload: response.data,
       });
-      console.log("USer asset --------:", response.data);
+      console.log("User assets --------:", response.data);
     } catch (error) {
       dispatch({
         type: types.GET_USER_ASSET_FAILURE,
