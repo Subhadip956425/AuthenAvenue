@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import profilepic from "../components/OIP.jpg";
 import PromptMessage from "./PromptMessage";
 import ResponseMessage from "./ResponseMessage";
@@ -8,6 +8,7 @@ import axios from "axios";
 const Chatbox = ({ isBotRealease, handleBotRealease }) => {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
   const handleFetchCoinDetails = async (prompt) => {
     setLoading(true);
@@ -15,14 +16,31 @@ const Chatbox = ({ isBotRealease, handleBotRealease }) => {
       const { data } = await axios.post("http://localhost:5455/ai/chat", {
         prompt,
       });
-      const response = { message: data.message, role: "model" };
+
+      const messageText =
+        data?.message && data.message.trim() !== ""
+          ? data.message
+          : "Sorry, I couldn't find any relevant data. Please try again.";
+
+      const response = { message: messageText, role: "model" };
       setResponses((prev) => [...prev, response]);
-      console.log("Success", data);
     } catch (error) {
       console.log("error", error);
+      setResponses((prev) => [
+        ...prev,
+        {
+          message: "Oops! Something went wrong while fetching the data.",
+          role: "model",
+        },
+      ]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [responses, loading]);
 
   return (
     <div className="chatbox blur-backgroud large-shadow z-50 bg-[#000518] bg-opacity-70 w-[90vw] md:w-[70vw] lg:w-[40vw] pb-6 h-[85vh] shadow-2xl shadow-blue-700">
@@ -48,7 +66,8 @@ const Chatbox = ({ isBotRealease, handleBotRealease }) => {
                 </div>
               )
             )}
-            {loading && <p>fetching data...</p>}
+            {loading && <p className="text-gray-400">fetching data...</p>}
+            <div ref={messagesEndRef} />
           </div>
         ) : (
           <div className="p-10 gap-5 h-full flex flex-col justify-center items-center">
